@@ -1,0 +1,10 @@
+{
+  "name": "repoli_app",
+  "short_name": "repoli",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#FF9800",
+  "orientation": "portrait-primary",
+  "prefer_related_applications": false
+}

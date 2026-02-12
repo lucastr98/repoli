@@ -1,7 +1,7 @@
 INSERT INTO recipes (title, instructions) VALUES 
-    ('Spaghetti Carbonara', '1. Boil pasta. 2. Cook pancetta. 3. Mix eggs and cheese. 4. Combine all with pasta.'),
-    ('Pancakes', '1. Mix flour, milk, and eggs. 2. Cook on griddle until golden brown on both sides.'),
-    ('Guacamole', '1. Mash avocados. 2. Add lime juice, salt, and diced onions. 3. Serve with tortilla chips.');
+    ('Spaghetti Carbonara', '1. Boil pasta.\n2. Cook pancetta.\n3. Mix eggs and cheese.\n4. Combine all with pasta.'),
+    ('Pancakes', '1. Mix flour, milk, and eggs.\n2. Cook on griddle until golden brown on both sides.'),
+    ('Guacamole', '1. Mash avocados.\n2. Add lime juice, salt, and diced onions.\n3. Serve with tortilla chips.');
 
 INSERT INTO ingredients (name) VALUES 
     ('Spaghetti'),

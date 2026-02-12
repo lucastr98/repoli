@@ -19,17 +19,6 @@ class RecipeDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                const Icon(Icons.access_time, size: 16, color: Colors.grey),
-                const SizedBox(width: 4),
-                Text(
-                  'Created: ${_formatDate(recipe.createdAt)}',
-                  style: const TextStyle(color: Colors.grey, fontSize: 12),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
             Text(
               recipe.title,
               style: const TextStyle(
@@ -41,7 +30,52 @@ class RecipeDetailScreen extends StatelessWidget {
             const Divider(),
             const SizedBox(height: 16),
             Text(
-              recipe.content,
+              'Ingredients',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            if (recipe.ingredients.isEmpty)
+              const Text(
+                'No ingredients listed.',
+                style: TextStyle(color: Colors.grey),
+              )
+            else
+              ...recipe.ingredients.map(
+                (ingredient) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Text(
+                    ingredient.quantity == null
+                        ? '${ingredient.unit} ${ingredient.name}'
+                        : '${ingredient.quantity} ${ingredient.unit} ${ingredient.name}',
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ),
+              ),
+            // const SizedBox(height: 24),
+            // Row(
+            //   children: [
+            //     const Icon(Icons.access_time, size: 16, color: Colors.grey),
+            //     const SizedBox(width: 4),
+            //     const Text(
+            //       'Created: —',
+            //       style: TextStyle(color: Colors.grey, fontSize: 12),
+            //     ),
+            //   ],
+            // ),
+            const SizedBox(height: 24),
+            const Text(
+              'Instructions',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              recipe.instructions.replaceAll('\\n', '\n'),
               style: const TextStyle(
                 fontSize: 16,
                 height: 1.5,
@@ -53,13 +87,5 @@ class RecipeDetailScreen extends StatelessWidget {
     );
   }
 
-  String _formatDate(String dateStr) {
-    try {
-      final date = DateTime.parse(dateStr);
-      return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')} '
-          '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
-    } catch (e) {
-      return dateStr;
-    }
-  }
+  
 }

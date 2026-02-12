@@ -13,3 +13,6 @@ frontend/.flutter-plugins-dependencies
 frontend/.pub-cache/
 frontend/.pub/
 frontend/pubspec.lock
+
+# other
+TODO.md

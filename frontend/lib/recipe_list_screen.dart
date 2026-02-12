@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'api_service.dart';
 import 'recipe_detail_screen.dart';
-import 'create_recipe_screen.dart';
+// import 'create_recipe_screen.dart';
 
 class RecipeListScreen extends StatefulWidget {
   const RecipeListScreen({Key? key}) : super(key: key);
@@ -51,19 +51,19 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
         foregroundColor: Colors.white,
       ),
       body: _buildBody(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const CreateRecipeScreen()),
-          );
-          if (result == true) {
-            _loadRecipes();
-          }
-        },
-        backgroundColor: Colors.orange,
-        child: const Icon(Icons.add),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () async {
+      //     final result = await Navigator.push(
+      //       context,
+      //       MaterialPageRoute(builder: (context) => const CreateRecipeScreen()),
+      //     );
+      //     if (result == true) {
+      //       _loadRecipes();
+      //     }
+      //   },
+      //   backgroundColor: Colors.orange,
+      //   child: const Icon(Icons.add),
+      // ),
     );
   }
 
@@ -102,10 +102,10 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
               style: TextStyle(fontSize: 20, color: Colors.grey),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Tap + to add your first recipe',
-              style: TextStyle(color: Colors.grey),
-            ),
+            // const Text(
+            //   'Tap + to add your first recipe',
+            //   style: TextStyle(color: Colors.grey),
+            // ),
           ],
         ),
       );
@@ -130,13 +130,6 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
               title: Text(
                 recipe.title,
                 style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              subtitle: Text(
-                recipe.content.length > 50
-                    ? '${recipe.content.substring(0, 50)}...'
-                    : recipe.content,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
               ),
               trailing: const Icon(Icons.chevron_right),
               onTap: () {

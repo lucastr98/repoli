@@ -58,7 +58,7 @@ async fn main() {
         .route("/", get(hello))
         .route("/recipes", get(list_recipes))
         // .route("/recipes", get(list_recipes).post(create_recipe))
-        // .route("/recipes/{id}", get(get_recipe))
+        .route("/recipes/{id}", get(get_recipe))
         .layer(
             CorsLayer::new()
                 .allow_origin(Any)
@@ -125,17 +125,32 @@ async fn list_recipes(State(state): State<AppState>) -> Result<Json<Vec<Recipe>>
 //     Ok(Json(recipe))
 // }
 
-// async fn get_recipe(
-//     State(state): State<AppState>,
-//     Path(id): Path<i64>,
-// ) -> Result<Json<Recipe>, StatusCode> {
-//     let recipe = sqlx::query_as::<_, Recipe>(
-//         "SELECT id, title, instructions, created_at FROM recipes WHERE id = ?"
-//     )
-//     .bind(id)
-//     .fetch_one(&state.db)
-//     .await
-//     .map_err(|_| StatusCode::NOT_FOUND)?;
+async fn get_recipe(
+    State(state): State<AppState>,
+    Path(id): Path<i64>,
+) -> Result<Json<Recipe>, StatusCode> {
+    let query = r#"
+        SELECT 
+            r.title, r.instructions, 
+            json_group_array(
+                json_object(
+                    'name', i.name,
+                    'quantity', ri.quantity,
+                    'unit', u.name
+                )
+            ) AS ingredients
+        FROM recipes r
+        JOIN recipe_ingredients ri ON r.id = ri.recipe_id
+        JOIN ingredients i ON ri.ingredient_id = i.id
+        JOIN units u ON ri.unit_id = u.id
+        WHERE r.id = ?
+        GROUP BY r.id
+    "#;
+    let recipe = sqlx::query_as::<_, Recipe>(query)
+        .bind(id)
+        .fetch_one(&state.db)
+    .await
+    .map_err(|_| StatusCode::NOT_FOUND)?;
     
-//     Ok(Json(recipe))
-// }
+    Ok(Json(recipe))
+}

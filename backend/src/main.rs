@@ -2,7 +2,7 @@ use axum::{
     extract::{Path, State},
     http::StatusCode,
     response::Json,
-    routing::{get, post},
+    routing::get,
     Router,
 };
 use tower_http::cors::{CorsLayer, Any};
@@ -16,17 +16,24 @@ struct AppState {
 
 #[derive(Serialize, Deserialize, FromRow)]
 struct Recipe {
-    id: i64,
     title: String,
-    content: String,
-    created_at: String,
+    instructions: String,
+    #[sqlx(json)]
+    ingredients: Vec<Ingredient>,
 }
 
 #[derive(Serialize, Deserialize)]
-struct CreateRecipe {
-    title: String,
-    content: String,
+struct Ingredient{
+    name: String,
+    quantity: Option<f64>,
+    unit: String,
 }
+
+// #[derive(Serialize, Deserialize)]
+// struct CreateRecipe {
+//     title: String,
+//     instructions: String,
+// }
 
 #[tokio::main]
 async fn main() {
@@ -49,9 +56,9 @@ async fn main() {
     // Build router
     let app = Router::new()
         .route("/", get(hello))
-        .route("/health", get(health_check))
-        .route("/recipes", get(list_recipes).post(create_recipe))
-        .route("/recipes/{id}", get(get_recipe))
+        .route("/recipes", get(list_recipes))
+        // .route("/recipes", get(list_recipes).post(create_recipe))
+        // .route("/recipes/{id}", get(get_recipe))
         .layer(
             CorsLayer::new()
                 .allow_origin(Any)
@@ -73,15 +80,27 @@ async fn main() {
 }
 
 async fn hello() -> &'static str {
-    "Hello, Recipe API! 🍳"
-}
-
-async fn health_check() -> StatusCode {
-    StatusCode::OK
+    "Hello, Repoli API! 🍳"
 }
 
 async fn list_recipes(State(state): State<AppState>) -> Result<Json<Vec<Recipe>>, StatusCode> {
-    let recipes = sqlx::query_as::<_, Recipe>("SELECT id, title, content, created_at FROM recipes")
+    let query = r#"
+        SELECT 
+            r.title, r.instructions, 
+            json_group_array(
+                json_object(
+                    'name', i.name,
+                    'quantity', ri.quantity,
+                    'unit', u.name
+                )
+            ) AS ingredients
+        FROM recipes r
+        JOIN recipe_ingredients ri ON r.id = ri.recipe_id
+        JOIN ingredients i ON ri.ingredient_id = i.id
+        JOIN units u ON ri.unit_id = u.id
+        GROUP BY r.id
+    "#;
+    let recipes = sqlx::query_as::<_, Recipe>(query)
         .fetch_all(&state.db)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
@@ -89,33 +108,34 @@ async fn list_recipes(State(state): State<AppState>) -> Result<Json<Vec<Recipe>>
     Ok(Json(recipes))
 }
 
-async fn create_recipe(
-    State(state): State<AppState>,
-    Json(input): Json<CreateRecipe>,
-) -> Result<Json<Recipe>, StatusCode> {
-    let recipe = sqlx::query_as::<_, Recipe>(
-        "INSERT INTO recipes (title, content) VALUES (?, ?) RETURNING id, title, content, created_at"
-    )
-    .bind(&input.title)
-    .bind(&input.content)
-    .fetch_one(&state.db)
-    .await
-    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
-    
-    Ok(Json(recipe))
-}
 
-async fn get_recipe(
-    State(state): State<AppState>,
-    Path(id): Path<i64>,
-) -> Result<Json<Recipe>, StatusCode> {
-    let recipe = sqlx::query_as::<_, Recipe>(
-        "SELECT id, title, content, created_at FROM recipes WHERE id = ?"
-    )
-    .bind(id)
-    .fetch_one(&state.db)
-    .await
-    .map_err(|_| StatusCode::NOT_FOUND)?;
+// async fn create_recipe(
+//     State(state): State<AppState>,
+//     Json(input): Json<CreateRecipe>,
+// ) -> Result<Json<Recipe>, StatusCode> {
+//     let recipe = sqlx::query_as::<_, Recipe>(
+//         "INSERT INTO recipes (title, instructions) VALUES (?, ?) RETURNING id, title, instructions, created_at"
+//     )
+//     .bind(&input.title)
+//     .bind(&input.instructions)
+//     .fetch_one(&state.db)
+//     .await
+//     .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
     
-    Ok(Json(recipe))
-}
+//     Ok(Json(recipe))
+// }
+
+// async fn get_recipe(
+//     State(state): State<AppState>,
+//     Path(id): Path<i64>,
+// ) -> Result<Json<Recipe>, StatusCode> {
+//     let recipe = sqlx::query_as::<_, Recipe>(
+//         "SELECT id, title, instructions, created_at FROM recipes WHERE id = ?"
+//     )
+//     .bind(id)
+//     .fetch_one(&state.db)
+//     .await
+//     .map_err(|_| StatusCode::NOT_FOUND)?;
+    
+//     Ok(Json(recipe))
+// }

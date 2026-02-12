@@ -32,7 +32,6 @@ class Recipe {
 }
 
 class ApiService {
-  // Change this to your backend URL if different
   final String baseUrl = 'http://localhost:3000';
 
   Future<List<Recipe>> getRecipes() async {

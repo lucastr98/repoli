@@ -26,7 +26,8 @@ class Recipe {
     return {
       'title': title,
       'instructions': instructions,
-      'ingredients': ingredients.map((ingredient) => ingredient.toJson()).toList(),
+      'ingredients':
+          ingredients.map((ingredient) => ingredient.toJson()).toList(),
     };
   }
 }
@@ -45,7 +46,9 @@ class Ingredient {
   factory Ingredient.fromJson(Map<String, dynamic> json) {
     return Ingredient(
       name: json['name'],
-      quantity: json['quantity'] == null ? null : (json['quantity'] as num).toDouble(),
+      quantity: json['quantity'] == null
+          ? null
+          : (json['quantity'] as num).toDouble(),
       unit: json['unit'],
     );
   }
@@ -83,17 +86,28 @@ class ApiService {
     }
   }
 
-//   Future<Recipe> createRecipe(String title, String content) async {
-//     final response = await http.post(
-//       Uri.parse('$baseUrl/recipes'),
-//       headers: {'Content-Type': 'application/json'},
-//       body: json.encode({'title': title, 'content': content}),
-//     );
+  // Future<Recipe> createRecipe(String title, String instructions) async {
+  //   final response = await http.post(
+  //     Uri.parse('$baseUrl/recipes'),
+  //     headers: {'Content-Type': 'application/json'},
+  //     body: json.encode({'title': title, 'instructions': instructions}),
+  //   );
 
-//     if (response.statusCode == 200) {
-//       return Recipe.fromJson(json.decode(response.body));
-//     } else {
-//       throw Exception('Failed to create recipe');
-//     }
-//   }
+  //   if (response.statusCode == 200) {
+  //     return Recipe.fromJson(json.decode(response.body));
+  //   } else {
+  //     throw Exception('Failed to create recipe');
+  //   }
+  // }
+
+  Future<List<String>> getUnits() async {
+    final response = await http.get(Uri.parse('$baseUrl/units'));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonList = json.decode(response.body);
+      return jsonList.map((json) => json.toString()).toList();
+    } else {
+      throw Exception('Failed to load units');
+    }
+  }
 }

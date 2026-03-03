@@ -23,17 +23,11 @@ struct Recipe {
 }
 
 #[derive(Serialize, Deserialize)]
-struct Ingredient{
+struct Ingredient {
     name: String,
     quantity: Option<f64>,
     unit: String,
 }
-
-// #[derive(Serialize, Deserialize)]
-// struct CreateRecipe {
-//     title: String,
-//     instructions: String,
-// }
 
 #[tokio::main]
 async fn main() {
@@ -57,6 +51,7 @@ async fn main() {
     let app = Router::new()
         .route("/", get(hello))
         .route("/recipes", get(list_recipes))
+        .route("/units", get(list_units))
         // .route("/recipes", get(list_recipes).post(create_recipe))
         .route("/recipes/{id}", get(get_recipe))
         .layer(
@@ -86,7 +81,8 @@ async fn hello() -> &'static str {
 async fn list_recipes(State(state): State<AppState>) -> Result<Json<Vec<Recipe>>, StatusCode> {
     let query = r#"
         SELECT 
-            r.title, r.instructions, 
+            r.title, 
+            r.instructions, 
             json_group_array(
                 json_object(
                     'name', i.name,
@@ -108,30 +104,14 @@ async fn list_recipes(State(state): State<AppState>) -> Result<Json<Vec<Recipe>>
     Ok(Json(recipes))
 }
 
-
-// async fn create_recipe(
-//     State(state): State<AppState>,
-//     Json(input): Json<CreateRecipe>,
-// ) -> Result<Json<Recipe>, StatusCode> {
-//     let recipe = sqlx::query_as::<_, Recipe>(
-//         "INSERT INTO recipes (title, instructions) VALUES (?, ?) RETURNING id, title, instructions, created_at"
-//     )
-//     .bind(&input.title)
-//     .bind(&input.instructions)
-//     .fetch_one(&state.db)
-//     .await
-//     .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
-    
-//     Ok(Json(recipe))
-// }
-
 async fn get_recipe(
     State(state): State<AppState>,
     Path(id): Path<i64>,
 ) -> Result<Json<Recipe>, StatusCode> {
     let query = r#"
         SELECT 
-            r.title, r.instructions, 
+            r.title, 
+            r.instructions, 
             json_group_array(
                 json_object(
                     'name', i.name,
@@ -153,4 +133,30 @@ async fn get_recipe(
     .map_err(|_| StatusCode::NOT_FOUND)?;
     
     Ok(Json(recipe))
+}
+
+// async fn create_recipe(
+//     State(state): State<AppState>,
+//     Json(input): Json<CreateRecipe>,
+// ) -> Result<Json<Recipe>, StatusCode> {
+//     let recipe = sqlx::query_as::<_, Recipe>(
+//         "INSERT INTO recipes (title, instructions) VALUES (?, ?) RETURNING id, title, instructions, created_at"
+//     )
+//     .bind(&input.title)
+//     .bind(&input.instructions)
+//     .fetch_one(&state.db)
+//     .await
+//     .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    
+//     Ok(Json(recipe))
+// }
+
+async fn list_units(State(state): State<AppState>) -> Result<Json<Vec<String>>, StatusCode> {
+    let query = "SELECT name FROM units";
+    let units = sqlx::query_scalar::<_, String>(query)
+        .fetch_all(&state.db)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    
+    Ok(Json(units))
 }

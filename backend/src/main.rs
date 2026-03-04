@@ -1,9 +1,5 @@
 use axum::{
-    extract::{Path, State},
-    http::StatusCode,
-    response::Json,
-    routing::get,
-    Router,
+    Router, extract::{Path, State}, http::StatusCode, response::Json, routing::{get, post}
 };
 use tower_http::cors::{CorsLayer, Any};
 use serde::{Deserialize, Serialize};
@@ -53,8 +49,8 @@ async fn main() {
         .route("/recipes", get(list_recipes))
         .route("/units", get(list_units))
         .route("/ingredients", get(list_ingredients))
-        // .route("/recipes", get(list_recipes).post(create_recipe))
         .route("/recipes/{id}", get(get_recipe))
+        .route("/recipe", post(create_recipe))
         .layer(
             CorsLayer::new()
                 .allow_origin(Any)
@@ -136,21 +132,21 @@ async fn get_recipe(
     Ok(Json(recipe))
 }
 
-// async fn create_recipe(
-//     State(state): State<AppState>,
-//     Json(input): Json<CreateRecipe>,
-// ) -> Result<Json<Recipe>, StatusCode> {
-//     let recipe = sqlx::query_as::<_, Recipe>(
-//         "INSERT INTO recipes (title, instructions) VALUES (?, ?) RETURNING id, title, instructions, created_at"
-//     )
-//     .bind(&input.title)
-//     .bind(&input.instructions)
-//     .fetch_one(&state.db)
-//     .await
-//     .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+async fn create_recipe(
+    State(state): State<AppState>,
+    Json(input): Json<Recipe>,
+) -> Result<Json<Recipe>, StatusCode> {
+    let recipe = sqlx::query_as::<_, Recipe>(
+        "INSERT INTO recipes (title, instructions) VALUES (?, ?) RETURNING title, instructions" // TODO: Return ingredients as well 
+    )
+    .bind(&input.title)
+    .bind(&input.instructions)
+    .fetch_one(&state.db)
+    .await
+    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
     
-//     Ok(Json(recipe))
-// }
+    Ok(Json(recipe))
+}
 
 async fn list_units(State(state): State<AppState>) -> Result<Json<Vec<String>>, StatusCode> {
     let query = "SELECT name FROM units";

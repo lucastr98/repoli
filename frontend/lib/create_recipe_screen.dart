@@ -9,15 +9,15 @@ class CreateRecipeScreen extends StatefulWidget {
 }
 
 class IngredientRow {
-  final TextEditingController amountController = TextEditingController();
-  final TextEditingController productController = TextEditingController();
+  final TextEditingController quantityController = TextEditingController();
+  final TextEditingController productNameController = TextEditingController();
   String? selectedUnit;
 }
 
 class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
-  final _contentController = TextEditingController();
+  final _instructionsController = TextEditingController();
   final ApiService _apiService = ApiService();
   late List<String> _unitOptions;
   late List<String> _ingredientOptions;
@@ -48,50 +48,56 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   @override
   void dispose() {
     _titleController.dispose();
-    _contentController.dispose();
+    _instructionsController.dispose();
     super.dispose();
   }
 
   Future<void> _submitRecipe() async {
-    // if (!_formKey.currentState!.validate()) {
-    //   return;
-    // }
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
-    // setState(() {
-    //   _isSubmitting = true;
-    // });
+    setState(() {
+      _isSubmitting = true;
+    });
 
-    // try {
-    //   await _apiService.createRecipe(
-    //     _titleController.text,
-    //     _contentController.text,
-    //   );
-
-    //   if (mounted) {
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //       const SnackBar(
-    //         content: Text('Recipe created successfully!'),
-    //         backgroundColor: Colors.green,
-    //       ),
-    //     );
-    //     Navigator.pop(context, true);
-    //   }
-    // } catch (e) {
-    //   if (mounted) {
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //       SnackBar(
-    //         content: Text('Error: $e'),
-    //         backgroundColor: Colors.red,
-    //       ),
-    //     );
-    //   }
-    // } finally {
-    //   if (mounted) {
-    //     setState(() {
-    //       _isSubmitting = false;
-    //     });
-    //   }
-    // }
+    try {
+      await _apiService.createRecipe(
+        _titleController.text,
+        _ingredients
+            .map((ing) => Ingredient(
+                  name: ing.productNameController.text,
+                  quantity: double.tryParse(ing.quantityController.text) ?? 0,
+                  unit: ing.selectedUnit ?? '',
+                ))
+            .toList(),
+        _instructionsController.text,
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Recipe created successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pop(context, true);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
+    }
   }
 
   @override
@@ -181,7 +187,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
           Expanded(
             flex: 1,
             child: TextFormField(
-              controller: ingredient.amountController,
+              controller: ingredient.quantityController,
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
               decoration: const InputDecoration(
@@ -218,7 +224,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                 });
               },
               onSelected: (String selection) {
-                ingredient.productController.text = selection;
+                ingredient.productNameController.text = selection;
               },
               fieldViewBuilder:
                   (context, controller, focusNode, onFieldSubmitted) {
@@ -253,7 +259,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
 
   Widget _buildInstructionsField() {
     return TextFormField(
-      controller: _contentController,
+      controller: _instructionsController,
       maxLines: 12,
       decoration: const InputDecoration(
         labelText: 'Instructions',

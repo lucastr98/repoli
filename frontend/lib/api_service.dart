@@ -86,19 +86,24 @@ class ApiService {
     }
   }
 
-  // Future<Recipe> createRecipe(String title, String instructions) async {
-  //   final response = await http.post(
-  //     Uri.parse('$baseUrl/recipes'),
-  //     headers: {'Content-Type': 'application/json'},
-  //     body: json.encode({'title': title, 'instructions': instructions}),
-  //   );
+  Future<Recipe> createRecipe(
+      String title, List<Ingredient> ingredients, String instructions) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/recipe'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        'title': title,
+        'instructions': instructions,
+        'ingredients': ingredients.map((ing) => ing.toJson()).toList()
+      }),
+    );
 
-  //   if (response.statusCode == 200) {
-  //     return Recipe.fromJson(json.decode(response.body));
-  //   } else {
-  //     throw Exception('Failed to create recipe');
-  //   }
-  // }
+    if (response.statusCode == 200) {
+      return Recipe.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to create recipe');
+    }
+  }
 
   Future<List<String>> getUnits() async {
     final response = await http.get(Uri.parse('$baseUrl/units'));

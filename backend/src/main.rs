@@ -52,6 +52,7 @@ async fn main() {
         .route("/", get(hello))
         .route("/recipes", get(list_recipes))
         .route("/units", get(list_units))
+        .route("/ingredients", get(list_ingredients))
         // .route("/recipes", get(list_recipes).post(create_recipe))
         .route("/recipes/{id}", get(get_recipe))
         .layer(
@@ -159,4 +160,14 @@ async fn list_units(State(state): State<AppState>) -> Result<Json<Vec<String>>, 
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
     
     Ok(Json(units))
+}
+
+async fn list_ingredients(State(state): State<AppState>) -> Result<Json<Vec<String>>, StatusCode> {
+    let query = "SELECT name FROM ingredients";
+    let ingredients = sqlx::query_scalar::<_, String>(query)
+        .fetch_all(&state.db)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    
+    Ok(Json(ingredients))
 }

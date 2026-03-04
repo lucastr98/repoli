@@ -110,4 +110,15 @@ class ApiService {
       throw Exception('Failed to load units');
     }
   }
+
+  Future<List<String>> getIngredients() async {
+    final response = await http.get(Uri.parse('$baseUrl/ingredients'));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonList = json.decode(response.body);
+      return jsonList.map((json) => json.toString()).toList();
+    } else {
+      throw Exception('Failed to load ingredients');
+    }
+  }
 }

@@ -10,7 +10,7 @@ struct AppState {
     db: SqlitePool,
 }
 
-#[derive(Serialize, Deserialize, FromRow)]
+#[derive(Serialize, Deserialize, FromRow, Debug)]
 struct Recipe {
     title: String,
     instructions: String,
@@ -18,7 +18,7 @@ struct Recipe {
     ingredients: Vec<Ingredient>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 struct Ingredient {
     name: String,
     quantity: Option<f64>,
@@ -135,18 +135,35 @@ async fn get_recipe(
 async fn create_recipe(
     State(state): State<AppState>,
     Json(input): Json<Recipe>,
-) -> Result<Json<Recipe>, StatusCode> {
-    let recipe = sqlx::query_as::<_, Recipe>(
-        "INSERT INTO recipes (title, instructions) VALUES (?, ?) RETURNING title, instructions" // TODO: Return ingredients as well 
+) -> Result<StatusCode, StatusCode> {
+    println!("Received recipe: {:?}", input);
+    sqlx::query(
+        "INSERT INTO recipes (title, instructions) VALUES (?, ?)"
     )
     .bind(&input.title)
     .bind(&input.instructions)
-    .fetch_one(&state.db)
+    .execute(&state.db) 
     .await
     .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
     
-    Ok(Json(recipe))
+    Ok(StatusCode::CREATED)
 }
+
+// async fn create_recipe(
+//     State(state): State<AppState>,
+//     Json(input): Json<Recipe>,
+// ) -> Result<Json<Recipe>, StatusCode> {
+//     let recipe = sqlx::query_as::<_, Recipe>(
+//         "INSERT INTO recipes (title, instructions) VALUES (?, ?) RETURNING title, instructions" // TODO: Return ingredients as well 
+//     )
+//     .bind(&input.title)
+//     .bind(&input.instructions)
+//     .fetch_one(&state.db)
+//     .await
+//     .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    
+//     Ok(Json(recipe))
+// }
 
 async fn list_units(State(state): State<AppState>) -> Result<Json<Vec<String>>, StatusCode> {
     let query = "SELECT name FROM units";

@@ -86,21 +86,20 @@ class ApiService {
     }
   }
 
-  Future<Recipe> createRecipe(
+  Future<void> createRecipe(
       String title, List<Ingredient> ingredients, String instructions) async {
+    final recipe = Recipe(
+      title: title,
+      instructions: instructions,
+      ingredients: ingredients,
+    );
     final response = await http.post(
       Uri.parse('$baseUrl/recipe'),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'title': title,
-        'instructions': instructions,
-        'ingredients': ingredients.map((ing) => ing.toJson()).toList()
-      }),
+      body: json.encode(recipe.toJson()),
     );
 
-    if (response.statusCode == 200) {
-      return Recipe.fromJson(json.decode(response.body));
-    } else {
+    if (response.statusCode != 201) {
       throw Exception('Failed to create recipe');
     }
   }

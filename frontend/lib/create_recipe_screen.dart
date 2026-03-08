@@ -179,10 +179,8 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
           ],
         ),
         const SizedBox(height: 8),
-        ..._ingredients
-            .asMap()
-            .entries
-            .map((entry) => _buildIngredientRow(entry.key, entry.value)),
+        ..._ingredients.asMap().entries.map((entry) =>
+            _buildIngredientRow(entry.key, entry.value, _ingredients.length)),
       ],
     );
   }
@@ -193,7 +191,8 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
     });
   }
 
-  Widget _buildIngredientRow(int index, IngredientRow ingredient) {
+  Widget _buildIngredientRow(
+      int index, IngredientRow ingredient, int totalIngredients) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Row(
@@ -257,10 +256,11 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
               },
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.delete_outline, color: Colors.red),
-            onPressed: () => _removeIngredient(index),
-          ),
+          if (totalIngredients > 1)
+            IconButton(
+              icon: const Icon(Icons.delete_outline, color: Colors.red),
+              onPressed: () => _removeIngredient(index),
+            ),
         ],
       ),
     );

@@ -9,9 +9,15 @@ class CreateRecipeScreen extends StatefulWidget {
 }
 
 class IngredientRow {
+  final Object id = Object();
   final TextEditingController quantityController = TextEditingController();
   final TextEditingController productNameController = TextEditingController();
   String? selectedUnit;
+
+  void dispose() {
+    quantityController.dispose();
+    productNameController.dispose();
+  }
 }
 
 class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
@@ -20,8 +26,8 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   final _instructionsController = TextEditingController();
   final ApiService _apiService = ApiService();
   late Future<void> _initIngredientRowOptions;
-  late List<String> _unitOptions;
-  late List<String> _ingredientOptions;
+  late List<String> _unitOptions = [];
+  late List<String> _ingredientOptions = [];
   bool _isSubmitting = false;
   List<IngredientRow> _ingredients = [];
 
@@ -54,6 +60,9 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   void dispose() {
     _titleController.dispose();
     _instructionsController.dispose();
+    for (final ingredient in _ingredients) {
+      ingredient.dispose();
+    }
     super.dispose();
   }
 
@@ -194,6 +203,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   Widget _buildIngredientRow(
       int index, IngredientRow ingredient, int totalIngredients) {
     return Padding(
+      key: ValueKey(ingredient.id),
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Row(
         children: [
@@ -281,7 +291,8 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
 
   void _removeIngredient(int index) {
     setState(() {
-      _ingredients.removeAt(index);
+      final ingredient = _ingredients.removeAt(index);
+      ingredient.dispose();
     });
   }
 

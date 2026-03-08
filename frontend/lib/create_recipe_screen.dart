@@ -12,6 +12,22 @@ class IngredientRow {
   final TextEditingController quantityController = TextEditingController();
   final TextEditingController productNameController = TextEditingController();
   String? selectedUnit;
+
+  bool isEmpty() {
+    return productNameController.text.trim().isEmpty &&
+        quantityController.text.trim().isEmpty &&
+        (selectedUnit == null || selectedUnit!.trim().isEmpty);
+  }
+
+  bool isValid(List<String> ingredientOptions, List<String> unitOptions) {
+    bool validQuantity = quantityController.text.isEmpty ||
+        double.tryParse(quantityController.text.trim()) != null;
+    bool validProductName =
+        ingredientOptions.contains(productNameController.text.trim());
+    bool validUnit =
+        selectedUnit != null && unitOptions.contains(selectedUnit!);
+    return validQuantity && validProductName && validUnit;
+  }
 }
 
 class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
@@ -57,7 +73,39 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
     super.dispose();
   }
 
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+
   Future<void> _submitRecipe() async {
+    final nonEmptyIngredients =
+        _ingredients.where((ing) => !ing.isEmpty()).toList();
+
+    if (nonEmptyIngredients.isEmpty) {
+      _showErrorSnackBar('Please add at least one ingredient.');
+      return;
+    }
+
+    List<String> errorMessages = [];
+    for (var i = 0; i < nonEmptyIngredients.length; i++) {
+      final ing = nonEmptyIngredients[i];
+      if (!ing.isValid(_ingredientOptions, _unitOptions)) {
+        errorMessages.add(
+            "Row ${i + 1}: Quantity = ${ing.quantityController.text}, Unit = ${ing.selectedUnit}, Ingredient = ${ing.productNameController.text}");
+      }
+    }
+
+    if (errorMessages.isNotEmpty) {
+      _showErrorSnackBar(
+          "The following ingredients are invalid:\n${errorMessages.join('\n')}");
+      return;
+    }
+
     if (!_formKey.currentState!.validate()) {
       return;
     }

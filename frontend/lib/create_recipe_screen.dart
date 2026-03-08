@@ -12,22 +12,6 @@ class IngredientRow {
   final TextEditingController quantityController = TextEditingController();
   final TextEditingController productNameController = TextEditingController();
   String? selectedUnit;
-
-//   bool isEmpty() {
-//     return productNameController.text.trim().isEmpty &&
-//         quantityController.text.trim().isEmpty &&
-//         (selectedUnit == null || selectedUnit!.trim().isEmpty);
-//   }
-
-//   bool isValid(List<String> ingredientOptions, List<String> unitOptions) {
-//     bool validQuantity = quantityController.text.isEmpty ||
-//         double.tryParse(quantityController.text.trim()) != null;
-//     bool validProductName =
-//         ingredientOptions.contains(productNameController.text.trim());
-//     bool validUnit =
-//         selectedUnit != null && unitOptions.contains(selectedUnit!);
-//     return validQuantity && validProductName && validUnit;
-//   }
 }
 
 class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
@@ -72,15 +56,6 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
     _instructionsController.dispose();
     super.dispose();
   }
-
-//   void _showErrorSnackBar(String message) {
-//     ScaffoldMessenger.of(context).showSnackBar(
-//       SnackBar(
-//         content: Text(message),
-//         backgroundColor: Colors.red,
-//       ),
-//     );
-//   }
 
   Future<void> _submitRecipe() async {
     if (!_formKey.currentState!.validate()) {

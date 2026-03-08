@@ -46,9 +46,9 @@ async fn main() {
     // Build router
     let app = Router::new()
         .route("/", get(hello))
-        .route("/recipes", get(list_recipes))
-        .route("/units", get(list_units))
-        .route("/ingredients", get(list_ingredients))
+        .route("/recipes", get(get_recipes))
+        .route("/units", get(get_units))
+        .route("/ingredients", get(get_ingredients))
         .route("/recipes/{id}", get(get_recipe))
         .route("/recipe", post(create_recipe))
         .layer(
@@ -75,7 +75,7 @@ async fn hello() -> &'static str {
     "Hello, Repoli API! 🍳"
 }
 
-async fn list_recipes(State(state): State<AppState>) -> Result<Json<Vec<Recipe>>, StatusCode> {
+async fn get_recipes(State(state): State<AppState>) -> Result<Json<Vec<Recipe>>, StatusCode> {
     let query = r#"
         SELECT 
             r.title, 
@@ -149,23 +149,7 @@ async fn create_recipe(
     Ok(StatusCode::CREATED)
 }
 
-// async fn create_recipe(
-//     State(state): State<AppState>,
-//     Json(input): Json<Recipe>,
-// ) -> Result<Json<Recipe>, StatusCode> {
-//     let recipe = sqlx::query_as::<_, Recipe>(
-//         "INSERT INTO recipes (title, instructions) VALUES (?, ?) RETURNING title, instructions" // TODO: Return ingredients as well 
-//     )
-//     .bind(&input.title)
-//     .bind(&input.instructions)
-//     .fetch_one(&state.db)
-//     .await
-//     .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
-    
-//     Ok(Json(recipe))
-// }
-
-async fn list_units(State(state): State<AppState>) -> Result<Json<Vec<String>>, StatusCode> {
+async fn get_units(State(state): State<AppState>) -> Result<Json<Vec<String>>, StatusCode> {
     let query = "SELECT name FROM units";
     let units = sqlx::query_scalar::<_, String>(query)
         .fetch_all(&state.db)
@@ -175,7 +159,7 @@ async fn list_units(State(state): State<AppState>) -> Result<Json<Vec<String>>, 
     Ok(Json(units))
 }
 
-async fn list_ingredients(State(state): State<AppState>) -> Result<Json<Vec<String>>, StatusCode> {
+async fn get_ingredients(State(state): State<AppState>) -> Result<Json<Vec<String>>, StatusCode> {
     let query = "SELECT name FROM ingredients";
     let ingredients = sqlx::query_scalar::<_, String>(query)
         .fetch_all(&state.db)

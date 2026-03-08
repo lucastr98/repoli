@@ -19,6 +19,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   final _titleController = TextEditingController();
   final _instructionsController = TextEditingController();
   final ApiService _apiService = ApiService();
+  late Future<void> _initIngredientRowOptions;
   late List<String> _unitOptions;
   late List<String> _ingredientOptions;
   bool _isSubmitting = false;
@@ -27,8 +28,12 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   @override
   void initState() {
     super.initState();
-    _loadUnits();
-    _loadIngredients();
+    _initIngredientRowOptions = _loadIngredientRowOptions();
+    _addIngredient();
+  }
+
+  Future<void> _loadIngredientRowOptions() async {
+    await Future.wait([_loadUnits(), _loadIngredients()]);
   }
 
   Future<void> _loadUnits() async {
@@ -104,23 +109,33 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildAppBar(),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildTitleField(),
-              const SizedBox(height: 16),
-              _buildIngredientSection(),
-              const SizedBox(height: 16),
-              _buildInstructionsField(),
-              const SizedBox(height: 16),
-              _buildSubmitButton(),
-            ],
-          ),
-        ),
+      body: FutureBuilder<void>(
+        future: _initIngredientRowOptions,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error loading data: ${snapshot.error}'));
+          }
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildTitleField(),
+                  const SizedBox(height: 16),
+                  _buildIngredientSection(),
+                  const SizedBox(height: 16),
+                  _buildInstructionsField(),
+                  const SizedBox(height: 16),
+                  _buildSubmitButton(),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }

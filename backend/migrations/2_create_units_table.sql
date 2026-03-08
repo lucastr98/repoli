@@ -1,6 +1,5 @@
-create table if not exists recipes (
+create table if not exists units (
     id integer primary key autoincrement,
-    title text not null,
-    instructions text not null,
+    name text not null,
     created_at text not null default (datetime('now'))
 );

@@ -4,6 +4,7 @@ backend/recipes.db
 backend/recipes.db-shm
 backend/recipes.db-wal
 backend/.env
+backend/.sqlx
 
 # Frontend (Flutter)
 frontend/.dart_tool/
@@ -13,3 +14,7 @@ frontend/.flutter-plugins-dependencies
 frontend/.pub-cache/
 frontend/.pub/
 frontend/pubspec.lock
+
+# other
+TODO.md
+Notes.md

@@ -46,7 +46,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Recipes'),
+        title: const Text('Repoli'),
         backgroundColor: Colors.orange,
         foregroundColor: Colors.white,
       ),
@@ -102,10 +102,10 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
               style: TextStyle(fontSize: 20, color: Colors.grey),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Tap + to add your first recipe',
-              style: TextStyle(color: Colors.grey),
-            ),
+            // const Text(
+            //   'Tap + to add your first recipe',
+            //   style: TextStyle(color: Colors.grey),
+            // ),
           ],
         ),
       );
@@ -130,13 +130,6 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
               title: Text(
                 recipe.title,
                 style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              subtitle: Text(
-                recipe.content.length > 50
-                    ? '${recipe.content.substring(0, 50)}...'
-                    : recipe.content,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
               ),
               trailing: const Icon(Icons.chevron_right),
               onTap: () {

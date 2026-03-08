@@ -135,17 +135,46 @@ async fn get_recipe(
 async fn create_recipe(
     State(state): State<AppState>,
     Json(input): Json<Recipe>,
-) -> Result<StatusCode, StatusCode> {
-    println!("Received recipe: {:?}", input);
-    sqlx::query(
-        "INSERT INTO recipes (title, instructions) VALUES (?, ?)"
+) -> Result<StatusCode, (StatusCode, String)> {
+    // Start a transaction
+    let mut tx = state.db.begin().await
+        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
+
+    let recipe_id = sqlx::query!(
+        "INSERT INTO recipes (title, instructions) VALUES (?, ?) RETURNING id",
+        input.title,
+        input.instructions
     )
-    .bind(&input.title)
-    .bind(&input.instructions)
-    .execute(&state.db) 
+    .fetch_one(&mut *tx)
     .await
-    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
-    
+    .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?
+    .id;
+
+    for ingredient in input.ingredients {
+        sqlx::query!(
+            r#"
+            INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity, unit_id)
+            VALUES (
+                ?, 
+                (SELECT id FROM ingredients WHERE name = ?), 
+                ?, 
+                (SELECT id FROM units WHERE name = ?)
+            )
+            "#,
+            recipe_id,
+            ingredient.name,
+            ingredient.quantity,
+            ingredient.unit
+        )
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, format!("Failed to link ingredient {}: {}", ingredient.name, e)))?;
+    }
+
+    // Commit the transaction
+    tx.commit().await
+        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
+
     Ok(StatusCode::CREATED)
 }
 

@@ -81,8 +81,8 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
         _ingredients
             .map((ing) => Ingredient(
                   name: ing.productNameController.text,
-                  quantity: double.tryParse(ing.quantityController.text) ?? 0,
-                  unit: ing.selectedUnit ?? '',
+                  quantity: double.tryParse(ing.quantityController.text),
+                  unit: ing.selectedUnit!,
                 ))
             .toList(),
         _instructionsController.text,

@@ -67,6 +67,24 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
     );
   }
 
+  Future<void> _deleteRecipe(int id) async {
+    try {
+      await _apiService.deleteRecipe(id);
+
+      setState(() {
+        _recipes.removeWhere((recipe) => recipe.id == id);
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Recipe deleted')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Delete failed: $e')),
+      );
+    }
+  }
+
   Widget _buildBody() {
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -117,33 +135,109 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
         itemCount: _recipes.length,
         itemBuilder: (context, index) {
           final recipe = _recipes[index];
-          return Card(
-            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            child: ListTile(
-              leading: CircleAvatar(
-                backgroundColor: Colors.orange,
-                child: Text(
-                  recipe.title[0].toUpperCase(),
-                  style: const TextStyle(color: Colors.white),
+          return Dismissible(
+            key: Key(recipe.id.toString()),
+            direction: DismissDirection.endToStart,
+            background: Container(
+              color: Colors.red,
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: const Icon(Icons.delete, color: Colors.white),
+            ),
+            confirmDismiss: (direction) async {
+              return await showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Delete Recipe'),
+                  content: Text(
+                      'Are you sure you want to delete "${recipe.title}"?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: const Text('Delete'),
+                    ),
+                  ],
                 ),
-              ),
-              title: Text(
-                recipe.title,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => RecipeDetailScreen(recipe: recipe),
+              );
+            },
+            onDismissed: (direction) {
+              _deleteRecipe(recipe.id!);
+            },
+            child: Card(
+              margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: Colors.orange,
+                  child: Text(
+                    recipe.title[0].toUpperCase(),
+                    style: const TextStyle(color: Colors.white),
                   ),
-                );
-              },
+                ),
+                title: Text(
+                  recipe.title,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => RecipeDetailScreen(recipe: recipe),
+                    ),
+                  );
+                },
+              ),
             ),
           );
+          // return Card(
+          //   margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          //   child: ListTile(
+          //     leading: CircleAvatar(
+          //       backgroundColor: Colors.orange,
+          //       child: Text(
+          //         recipe.title[0].toUpperCase(),
+          //         style: const TextStyle(color: Colors.white),
+          //       ),
+          //     ),
+          //     title: Text(
+          //       recipe.title,
+          //       style: const TextStyle(fontWeight: FontWeight.bold),
+          //     ),
+          //     trailing: const Icon(Icons.chevron_right),
+          //     onTap: () {
+          //       Navigator.push(
+          //         context,
+          //         MaterialPageRoute(
+          //           builder: (context) => RecipeDetailScreen(recipe: recipe),
+          //         ),
+          //       );
+          //     },
+          //   ),
+          // );
         },
       ),
     );
   }
 }
+
+// TODO: improve background?
+// background: Container(
+//   decoration: BoxDecoration(
+//     color: Colors.red,
+//     borderRadius: BorderRadius.circular(8),
+//   ),
+//   alignment: Alignment.centerRight,
+//   padding: const EdgeInsets.symmetric(horizontal: 20),
+//   child: const Row(
+//     mainAxisAlignment: MainAxisAlignment.end,
+//     children: [
+//       Icon(Icons.delete, color: Colors.white),
+//       SizedBox(width: 8),
+//       Text("Delete", style: TextStyle(color: Colors.white)),
+//     ],
+//   ),
+// ),

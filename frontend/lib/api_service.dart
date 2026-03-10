@@ -2,11 +2,13 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class Recipe {
+  final int? id;
   final String title;
   final String instructions;
   final List<Ingredient> ingredients;
 
   Recipe({
+    this.id,
     required this.title,
     required this.instructions,
     required this.ingredients,
@@ -14,6 +16,7 @@ class Recipe {
 
   factory Recipe.fromJson(Map<String, dynamic> json) {
     return Recipe(
+      id: json['id'],
       title: json['title'],
       instructions: json['instructions'],
       ingredients: (json['ingredients'] as List<dynamic>? ?? [])
@@ -101,6 +104,14 @@ class ApiService {
 
     if (response.statusCode != 201) {
       throw Exception('Failed to create recipe');
+    }
+  }
+
+  Future<void> deleteRecipe(int id) async {
+    final response = await http.delete(Uri.parse('$baseUrl/recipes/$id'));
+
+    if (response.statusCode != 204) {
+      throw Exception('Failed to delete recipe');
     }
   }
 

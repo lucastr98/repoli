@@ -15,6 +15,7 @@ struct Recipe {
     id: i64,
     title: String,
     instructions: String,
+    number_of_servings: i64,
     #[sqlx(json)]
     ingredients: Vec<Ingredient>,
 }
@@ -83,6 +84,7 @@ async fn get_recipes(State(state): State<AppState>) -> Result<Json<Vec<Recipe>>,
             r.id,
             r.title, 
             r.instructions, 
+            r.number_of_servings,
             json_group_array(
                 json_object(
                     'name', i.name,
@@ -113,6 +115,7 @@ async fn get_recipe(
             r.id,
             r.title, 
             r.instructions, 
+            r.number_of_servings,
             json_group_array(
                 json_object(
                     'name', i.name,

@@ -86,6 +86,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                 ))
             .toList(),
         _instructionsController.text,
+        4,
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

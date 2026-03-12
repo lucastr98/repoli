@@ -1,7 +1,7 @@
-INSERT INTO recipes (title, instructions) VALUES 
-    ('Spaghetti Carbonara', '1. Boil pasta.\n2. Cook pancetta.\n3. Mix eggs and cheese.\n4. Combine all with pasta.'),
-    ('Pancakes', '1. Mix flour, milk, and eggs.\n2. Cook on griddle until golden brown on both sides.'),
-    ('Guacamole', '1. Mash avocados.\n2. Add lime juice, salt, and diced onions.\n3. Serve with tortilla chips.');
+INSERT INTO recipes (title, instructions, number_of_servings) VALUES 
+    ('Spaghetti Carbonara', '1. Boil pasta.\n2. Cook pancetta.\n3. Mix eggs and cheese.\n4. Combine all with pasta.', 2),
+    ('Pancakes', '1. Mix flour, milk, and eggs.\n2. Cook on griddle until golden brown on both sides.', 4),
+    ('Guacamole', '1. Mash avocados.\n2. Add lime juice, salt, and diced onions.\n3. Serve with tortilla chips.', 3);
 
 INSERT INTO ingredients (name) VALUES 
     ('Spaghetti'),

@@ -29,6 +29,26 @@ class RecipeDetailScreen extends StatelessWidget {
             const SizedBox(height: 16),
             const Divider(),
             const SizedBox(height: 16),
+            Row(
+              children: [
+                IconButton(
+                  icon: Icon(Icons.remove),
+                  onPressed: () => recipe.numberOfServings.value > 1
+                      ? recipe.numberOfServings.value--
+                      : null,
+                ),
+                ValueListenableBuilder<int>(
+                  valueListenable: recipe.numberOfServings,
+                  builder: (_, value, __) => Text('$value'),
+                ),
+                IconButton(
+                  icon: Icon(Icons.add),
+                  onPressed: () => recipe.numberOfServings.value++,
+                ),
+                Text('Servings', style: const TextStyle(fontSize: 16)),
+              ],
+            ),
+            const SizedBox(height: 16),
             Text(
               'Ingredients',
               style: const TextStyle(
@@ -37,34 +57,17 @@ class RecipeDetailScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            if (recipe.ingredients.isEmpty)
-              const Text(
-                'No ingredients listed.',
-                style: TextStyle(color: Colors.grey),
-              )
-            else
-              ...recipe.ingredients.map(
-                (ingredient) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Text(
-                    ingredient.quantity == null
-                        ? '${ingredient.unit} ${ingredient.name}'
-                        : '${ingredient.quantity} ${ingredient.unit} ${ingredient.name}',
-                    style: const TextStyle(fontSize: 16),
-                  ),
+            ...recipe.ingredients.map(
+              (ingredient) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Text(
+                  ingredient.quantity == null
+                      ? '${ingredient.unit} ${ingredient.name}'
+                      : '${ingredient.quantity} ${ingredient.unit} ${ingredient.name}',
+                  style: const TextStyle(fontSize: 16),
                 ),
               ),
-            // const SizedBox(height: 24),
-            // Row(
-            //   children: [
-            //     const Icon(Icons.access_time, size: 16, color: Colors.grey),
-            //     const SizedBox(width: 4),
-            //     const Text(
-            //       'Created: —',
-            //       style: TextStyle(color: Colors.grey, fontSize: 12),
-            //     ),
-            //   ],
-            // ),
+            ),
             const SizedBox(height: 24),
             const Text(
               'Instructions',
@@ -86,6 +89,4 @@ class RecipeDetailScreen extends StatelessWidget {
       ),
     );
   }
-
-  
 }

@@ -1,16 +1,19 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class Recipe {
   final int? id;
   final String title;
   final String instructions;
+  final ValueNotifier<int> numberOfServings;
   final List<Ingredient> ingredients;
 
   Recipe({
     this.id,
     required this.title,
     required this.instructions,
+    required this.numberOfServings,
     required this.ingredients,
   });
 
@@ -19,6 +22,7 @@ class Recipe {
       id: json['id'],
       title: json['title'],
       instructions: json['instructions'],
+      numberOfServings: ValueNotifier<int>(json['number_of_servings']),
       ingredients: (json['ingredients'] as List<dynamic>? ?? [])
           .map((ingredient) => Ingredient.fromJson(ingredient))
           .toList(),
@@ -29,6 +33,7 @@ class Recipe {
     return {
       'title': title,
       'instructions': instructions,
+      'number_of_servings': numberOfServings.value,
       'ingredients':
           ingredients.map((ingredient) => ingredient.toJson()).toList(),
     };
@@ -89,11 +94,12 @@ class ApiService {
     }
   }
 
-  Future<void> createRecipe(
-      String title, List<Ingredient> ingredients, String instructions) async {
+  Future<void> createRecipe(String title, List<Ingredient> ingredients,
+      String instructions, int numberOfServings) async {
     final recipe = Recipe(
       title: title,
       instructions: instructions,
+      numberOfServings: ValueNotifier<int>(numberOfServings),
       ingredients: ingredients,
     );
     final response = await http.post(

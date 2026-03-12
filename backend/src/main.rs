@@ -1,5 +1,5 @@
 use axum::{
-    Router, extract::{Path, State}, http::StatusCode, response::Json, routing::{get, post}
+    Router, extract::{Path, State}, http::StatusCode, response::Json, routing::{get, post, delete}
 };
 use tower_http::cors::{CorsLayer, Any};
 use serde::{Deserialize, Serialize};
@@ -12,6 +12,7 @@ struct AppState {
 
 #[derive(Serialize, Deserialize, FromRow, Debug)]
 struct Recipe {
+    id: i64,
     title: String,
     instructions: String,
     #[sqlx(json)]
@@ -50,6 +51,7 @@ async fn main() {
         .route("/units", get(get_units))
         .route("/ingredients", get(get_ingredients))
         .route("/recipes/{id}", get(get_recipe))
+        .route("/recipes/{id}", delete(delete_recipe))
         .route("/recipe", post(create_recipe))
         .layer(
             CorsLayer::new()
@@ -78,6 +80,7 @@ async fn hello() -> &'static str {
 async fn get_recipes(State(state): State<AppState>) -> Result<Json<Vec<Recipe>>, StatusCode> {
     let query = r#"
         SELECT 
+            r.id,
             r.title, 
             r.instructions, 
             json_group_array(
@@ -107,6 +110,7 @@ async fn get_recipe(
 ) -> Result<Json<Recipe>, StatusCode> {
     let query = r#"
         SELECT 
+            r.id,
             r.title, 
             r.instructions, 
             json_group_array(
@@ -176,6 +180,31 @@ async fn create_recipe(
         .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
 
     Ok(StatusCode::CREATED)
+}
+
+async fn delete_recipe(
+    State(state): State<AppState>,
+    Path(id): Path<i64>,
+) -> Result<StatusCode, (StatusCode, String)> {
+    // Start a transaction
+    let mut tx = state.db.begin().await
+        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
+
+    sqlx::query!("DELETE FROM recipe_ingredients WHERE recipe_id = ?", id)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
+
+    sqlx::query!("DELETE FROM recipes WHERE id = ?", id)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
+
+    // Commit the transaction
+    tx.commit().await
+        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
+    
+    Ok(StatusCode::NO_CONTENT)
 }
 
 async fn get_units(State(state): State<AppState>) -> Result<Json<Vec<String>>, StatusCode> {

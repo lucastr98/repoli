@@ -193,51 +193,8 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
               ),
             ),
           );
-          // return Card(
-          //   margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          //   child: ListTile(
-          //     leading: CircleAvatar(
-          //       backgroundColor: Colors.orange,
-          //       child: Text(
-          //         recipe.title[0].toUpperCase(),
-          //         style: const TextStyle(color: Colors.white),
-          //       ),
-          //     ),
-          //     title: Text(
-          //       recipe.title,
-          //       style: const TextStyle(fontWeight: FontWeight.bold),
-          //     ),
-          //     trailing: const Icon(Icons.chevron_right),
-          //     onTap: () {
-          //       Navigator.push(
-          //         context,
-          //         MaterialPageRoute(
-          //           builder: (context) => RecipeDetailScreen(recipe: recipe),
-          //         ),
-          //       );
-          //     },
-          //   ),
-          // );
         },
       ),
     );
   }
 }
-
-// TODO: improve background?
-// background: Container(
-//   decoration: BoxDecoration(
-//     color: Colors.red,
-//     borderRadius: BorderRadius.circular(8),
-//   ),
-//   alignment: Alignment.centerRight,
-//   padding: const EdgeInsets.symmetric(horizontal: 20),
-//   child: const Row(
-//     mainAxisAlignment: MainAxisAlignment.end,
-//     children: [
-//       Icon(Icons.delete, color: Colors.white),
-//       SizedBox(width: 8),
-//       Text("Delete", style: TextStyle(color: Colors.white)),
-//     ],
-//   ),
-// ),
